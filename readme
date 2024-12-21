@@ -1,0 +1,14 @@
+#packages to be installed
+
+##package.json file
+npm init -y
+
+##express
+npm install express
+
+##nodemon /*optional*/
+npm i -g nodemon
+
+##joi
+npm install joi
+
