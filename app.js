@@ -28,6 +28,7 @@ app.get("/api/users/:id", (req, res) => {
   res.send(user);
 });
 
+//create a new user
 app.post("/api/users", validate, (req, res) => {
   // validate in this case is using the function defined in
   // validator.js file to validate the client request
