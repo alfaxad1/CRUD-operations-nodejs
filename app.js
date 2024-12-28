@@ -1,23 +1,28 @@
 const express = require("express");
-const users = require("./users");
+
 const validate = require("./validator");
+const {
+  getUsers,
+  createUser,
+  updateUser,
+  getUser,
+  deleteUser,
+} = require("./database");
 
 const app = express();
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("Hello, World!");
-});
-
 //get all the users
-app.get("/api/users", (req, res) => {
+app.get("/api/users", async (req, res) => {
+  const users = await getUsers();
   res.send(users);
 });
 
 //get a user by id
-app.get("/api/users/:id", (req, res) => {
-  //check if the user exists, if not return 404, if exists return the use(user)
+app.get("/api/users/:id", async (req, res) => {
+  //check if the user exists, if not return 404, if exists return the user
+  const users = await getUsers();
   const user = users.find((user) => {
     return user.id === parseInt(req.params.id);
   });
@@ -29,22 +34,22 @@ app.get("/api/users/:id", (req, res) => {
 });
 
 //create a new user
-app.post("/api/users", validate, (req, res) => {
+app.post("/api/users", validate, async (req, res) => {
   // validate in this case is using the function defined in
   // validator.js file to validate the client request
-  const newUser = {
-    id: users.length + 1,
-    ...req.body,
-  };
-  users.push(newUser);
-  res.send(newUser);
+  const { name, age } = req.body;
+  const user = await createUser(name, age);
+
+  res.send(user);
 });
 
-app.put("/api/users/:id", validate, (req, res) => {
+app.put("/api/users/:id", validate, async (req, res) => {
   // validate in this case is using the function defined in
   // validator.js file to validate the client request
 
   //check if the user exists, if not return 404, if exists update
+  const users = await getUsers();
+
   const user = users.find((user) => {
     return user.id === parseInt(req.params.id);
   });
@@ -54,12 +59,14 @@ app.put("/api/users/:id", validate, (req, res) => {
   }
 
   //update the user and return the updated user
-  user.name = req.body.name;
-  res.send(user.name);
+  updateUser(req.body.name, req.body.age, req.params.id);
+  const updatedUser = await getUser(req.params.id);
+  res.send(updatedUser);
 });
 
-app.delete("/api/users/:id", (req, res) => {
+app.delete("/api/users/:id", async (req, res) => {
   //check if the user exists, if not return 404, if exists delete
+  const users = await getUsers();
   const user = users.find((user) => {
     return user.id === parseInt(req.params.id);
   });
@@ -69,11 +76,11 @@ app.delete("/api/users/:id", (req, res) => {
   }
 
   //delete
-  const index = users.indexOf(user);
-  users.splice(index, 1);
+  deleteUser(req.params.id);
 
-  //return the user
-  res.send(user);
+  //return all users
+  const deletedUser = await getUser(req.params.id);
+  res.send(deletedUser);
 });
 
 module.exports = app;
