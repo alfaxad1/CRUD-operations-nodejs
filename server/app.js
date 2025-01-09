@@ -1,22 +1,26 @@
 const express = require("express");
+const cors = require("cors");
 
-const validate = require("./validator");
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+const validate = require("./middlewares/validator");
+const { authorize } = require("./middlewares/authorize");
 const {
   getUsers,
   createUser,
   updateUser,
   getUser,
   deleteUser,
+  getUserRoles,
 } = require("./database");
-
-const app = express();
-
-app.use(express.json());
 
 //get all the users
 app.get("/api/users", async (req, res) => {
   const users = await getUsers();
-  res.send(users);
+  res.json({ users });
 });
 
 //get a user by id
@@ -34,13 +38,13 @@ app.get("/api/users/:id", async (req, res) => {
 });
 
 //create a new user
-app.post("/api/users", validate, async (req, res) => {
+app.post("/api/users", async (req, res) => {
   // validate in this case is using the function defined in
   // validator.js file to validate the client request
   const { name, age } = req.body;
   const user = await createUser(name, age);
 
-  res.send(user);
+  res.status(201).json({ user });
 });
 
 app.put("/api/users/:id", validate, async (req, res) => {
@@ -81,6 +85,17 @@ app.delete("/api/users/:id", async (req, res) => {
   //return all users
   const deletedUser = await getUser(req.params.id);
   res.send(deletedUser);
+});
+
+app.get("/api/userRole", async (req, res) => {
+  const user = await getUserRoles;
+  res.send(user);
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.send(500).send("something broke!");
+  next();
 });
 
 module.exports = app;

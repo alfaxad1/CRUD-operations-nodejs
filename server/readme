@@ -15,3 +15,5 @@ npm install joi
 ##mysql 
 npm i mysql2
 
+##cor
+npm i cors
