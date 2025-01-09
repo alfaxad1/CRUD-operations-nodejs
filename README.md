@@ -19,3 +19,5 @@ npm i -g nodemon
 ##joi
 npm install joi
 
+##mysql2
+npm i mysql2
